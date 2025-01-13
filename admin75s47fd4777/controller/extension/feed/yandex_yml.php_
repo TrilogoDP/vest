@@ -1,0 +1,460 @@
+<?php
+class ControllerExtensionFeedYandexYml extends Controller {
+	private function isOldVersion() {
+		$v = explode('.', VERSION);
+		return $v[2] < 3;
+	}
+
+	private $error = array();
+
+	public function index() {
+		$this->load->language('extension/feed/yandex_yml');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('setting/setting');
+
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && ($this->validate($this->request->post))) {
+			if (isset($this->request->post['yandex_yml_categories'])) {
+				$this->request->post['yandex_yml_categories'] = implode(',', $this->request->post['yandex_yml_categories']);
+			}
+			if (isset($this->request->post['yandex_yml_manufacturers'])) {
+				$this->request->post['yandex_yml_manufacturers'] = implode(',', $this->request->post['yandex_yml_manufacturers']);
+			}
+			if (isset($this->request->post['yandex_yml_categ_mapping'])) {
+				$this->request->post['yandex_yml_categ_mapping'] = serialize($this->request->post['yandex_yml_categ_mapping']);
+			}
+			if (isset($this->request->post['yandex_yml_blacklist'])) {
+				$this->request->post['yandex_yml_blacklist'] = implode(',', $this->request->post['yandex_yml_blacklist']);
+			}
+			if (isset($this->request->post['yandex_yml_pricefrom'])) {
+				$this->request->post['yandex_yml_pricefrom'] = floatval($this->request->post['yandex_yml_pricefrom']);
+			}
+			if (isset($this->request->post['yandex_yml_attributes'])) {
+				$this->request->post['yandex_yml_attributes'] = implode(',', $this->request->post['yandex_yml_attributes']);
+			}
+			if (isset($this->request->post['yandex_yml_color_options'])) {
+				$this->request->post['yandex_yml_color_options'] = implode(',', $this->request->post['yandex_yml_color_options']);
+			}
+			if (isset($this->request->post['yandex_yml_size_options'])) {
+				$this->request->post['yandex_yml_size_options'] = implode(',', $this->request->post['yandex_yml_size_options']);
+			}
+			if (isset($this->request->post['yandex_yml_size_units'])) {
+				$this->request->post['yandex_yml_size_units'] = serialize($this->request->post['yandex_yml_size_units']);
+			}
+
+			$this->model_setting_setting->editSetting('yandex_yml', $this->request->post);
+
+			$this->session->data['success'] = $this->language->get('text_success');
+
+			$this->response->redirect($this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=feed', 'SSL'));
+		}
+
+		$data['token'] = $this->session->data['token'];
+		$data['heading_title'] = $this->language->get('heading_title');
+
+		$data['tab_general'] = $this->language->get('tab_general');
+		$data['tab_categories'] = $this->language->get('tab_categories');
+		$data['tab_attributes'] = $this->language->get('tab_attributes');
+		$data['tab_tailor'] = $this->language->get('tab_tailor');
+
+		$data['text_enabled'] = $this->language->get('text_enabled');
+		$data['text_disabled'] = $this->language->get('text_disabled');
+		$data['text_select_all'] = $this->language->get('text_select_all');
+		$data['text_unselect_all'] = $this->language->get('text_unselect_all');
+		$data['text_blacklist'] = $this->language->get('text_blacklist');
+		$data['text_whitelist'] = $this->language->get('text_whitelist');
+
+		$data['entry_status'] = $this->language->get('entry_status');
+		$data['entry_data_feed'] = $this->language->get('entry_data_feed');
+		//$data['entry_shopname'] = $this->language->get('entry_shopname');
+		$data['entry_company'] = $this->language->get('entry_company');
+		$data['entry_datamodel'] = $this->language->get('entry_datamodel');
+		$data['datamodels'] = $this->language->get('datamodels');
+		$data['entry_delivery_cost'] = $this->language->get('entry_delivery_cost');
+		
+		$data['entry_category'] = $this->language->get('entry_category');
+		$data['entry_manufacturers'] = $this->language->get('entry_manufacturers');
+		$data['entry_blacklist_type'] = $this->language->get('entry_blacklist_type');
+		$data['entry_blacklist'] = $this->language->get('entry_blacklist');
+		$data['entry_whitelist'] = $this->language->get('entry_whitelist');
+		$data['entry_pricefrom'] = $this->language->get('entry_pricefrom');
+		$data['entry_currency'] = $this->language->get('entry_currency');
+		$data['entry_unavailable'] = $this->language->get('entry_unavailable');
+		$data['entry_in_stock'] = $this->language->get('entry_in_stock');
+		$data['entry_out_of_stock'] = $this->language->get('entry_out_of_stock');
+
+		$data['entry_pickup'] = $this->language->get('entry_pickup');
+		$data['entry_sales_notes'] = $this->language->get('entry_sales_notes');
+		$data['entry_store'] = $this->language->get('entry_store');
+		$data['entry_numpictures'] = $this->language->get('entry_numpictures');
+
+		$data['button_save'] = $this->language->get('button_save');
+		$data['button_cancel'] = $this->language->get('button_cancel');
+
+		$data['text_yes'] = $this->language->get('text_yes');
+		$data['text_no'] = $this->language->get('text_no');
+		
+		$data['entry_cron_run'] = $this->language->get('entry_cron_run');
+		$data['cron_path'] = 'php '.realpath(DIR_CATALOG.'../export/yandex_yml.php');
+		$data['entry_export_url'] = $this->language->get('entry_export_url');
+		$data['export_url'] = HTTP_CATALOG.'export/yandex_yml.xml';
+
+		if (isset($this->error['warning'])) {
+			$data['error_warning'] = $this->error['warning'];
+		} else {
+			$data['error_warning'] = '';
+		}
+
+		$data['breadcrumbs'] = array();
+
+		$data['breadcrumbs'][] = array(
+			'href'      => $this->url->link('common/home', 'token=' . $this->session->data['token'], 'SSL'),
+			'text'      => $this->language->get('text_home'),
+			'separator' => FALSE
+		);
+
+		$data['breadcrumbs'][] = array(
+			'href'      => $this->url->link('extension/feed', 'token=' . $this->session->data['token'], 'SSL'),
+			'text'      => $this->language->get('text_feed'),
+			'separator' => ' :: '
+		);
+
+		$data['breadcrumbs'][] = array(
+			'href'      => $this->url->link('extension/feed/yandex_yml', 'token=' . $this->session->data['token'], 'SSL'),
+			'text'      => $this->language->get('heading_title'),
+			'separator' => ' :: '
+		);
+
+		$data['action'] = $this->url->link('extension/feed/yandex_yml', 'token=' . $this->session->data['token'], 'SSL');
+
+		$data['cancel'] =$this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=feed', 'SSL');
+
+		if (isset($this->request->post['yandex_yml_status'])) {
+			$data['yandex_yml_status'] = $this->request->post['yandex_yml_status'];
+		} else {
+			$data['yandex_yml_status'] = $this->config->get('yandex_yml_status');
+		}
+
+		$data['data_feed'] = HTTP_CATALOG . 'index.php?route=extension/feed/yandex_yml';
+
+		/*
+		if (isset($this->request->post['yandex_yml_shopname'])) {
+			$data['yandex_yml_shopname'] = $this->request->post['yandex_yml_shopname'];
+		} else {
+			$data['yandex_yml_shopname'] = $this->config->get('yandex_yml_shopname');
+		}
+
+		if (isset($this->request->post['yandex_yml_company'])) {
+			$data['yandex_yml_company'] = $this->request->post['yandex_yml_company'];
+		} else {
+			$data['yandex_yml_company'] = $this->config->get('yandex_yml_company');
+		}
+		*/
+
+		if (isset($this->request->post['yandex_yml_datamodel'])) {
+			$data['yandex_yml_datamodel'] = $this->request->post['yandex_yml_datamodel'];
+		} else {
+			$data['yandex_yml_datamodel'] = $this->config->get('yandex_yml_datamodel');
+		}
+		
+		if (isset($this->request->post['yandex_yml_delivery_cost'])) {
+			$data['yandex_yml_delivery_cost'] = $this->request->post['yandex_yml_delivery_cost'];
+		} else {
+			$data['yandex_yml_delivery_cost'] = $this->config->get('yandex_yml_delivery_cost');
+		}
+
+		if (isset($this->request->post['yandex_yml_pricefrom'])) {
+			$data['pricefrom'] = $this->request->post['yandex_yml_pricefrom'];
+		} else {
+			$data['pricefrom'] = $this->config->get('yandex_yml_pricefrom');
+		}
+
+		if (isset($this->request->post['yandex_yml_currency'])) {
+			$data['yandex_yml_currency'] = $this->request->post['yandex_yml_currency'];
+		} else {
+			$data['yandex_yml_currency'] = $this->config->get('yandex_yml_currency');
+		}
+
+		if (isset($this->request->post['yandex_yml_blacklist_type'])) {
+			$data['blacklist_type'] = $this->request->post['yandex_yml_blacklist_type'];
+		} else {
+			$data['blacklist_type'] = $this->config->get('yandex_yml_blacklist_type');
+		}
+
+		if (isset($this->request->post['yandex_yml_blacklist'])) {
+			$blacklist = $this->request->post['yandex_yml_blacklist'];
+		} else {
+			$blacklist = explode(',', $this->config->get('yandex_yml_blacklist'));
+		}
+		$this->load->model('catalog/product');
+		
+		$data['blacklist'] = array();
+		
+		foreach ($blacklist as $product_id) {
+			$product_info = $this->model_catalog_product->getProduct($product_id);
+			
+			if ($product_info) {
+				$data['blacklist'][] = array(
+					'product_id' => $product_info['product_id'],
+					'name'       => $product_info['name']
+				);
+			}
+		}
+
+		if (isset($this->request->post['yandex_yml_unavailable'])) {
+			$data['yandex_yml_unavailable'] = $this->request->post['yandex_yml_unavailable'];
+		} elseif ($this->config->get('yandex_yml_unavailable')) {
+			$data['yandex_yml_unavailable'] = $this->config->get('yandex_yml_unavailable');
+		} else {
+			$data['yandex_yml_unavailable'] = '';
+		}
+
+		if (isset($this->request->post['yandex_yml_in_stock'])) {
+			$data['yandex_yml_in_stock'] = $this->request->post['yandex_yml_in_stock'];
+		} elseif ($this->config->get('yandex_yml_in_stock')) {
+			$data['yandex_yml_in_stock'] = $this->config->get('yandex_yml_in_stock');
+		} else {
+			$data['yandex_yml_in_stock'] = 7;
+		}
+
+		if (isset($this->request->post['yandex_yml_out_of_stock'])) {
+			$data['yandex_yml_out_of_stock'] = $this->request->post['yandex_yml_out_of_stock'];
+		} elseif ($this->config->get('yandex_yml_in_stock')) {
+			$data['yandex_yml_out_of_stock'] = $this->config->get('yandex_yml_out_of_stock');
+		} else {
+			$data['yandex_yml_out_of_stock'] = 5;
+		}
+
+		if (isset($this->request->post['yandex_yml_pickup'])) {
+			$data['yandex_yml_pickup'] = $this->request->post['yandex_yml_pickup'];
+		} else {
+			$data['yandex_yml_pickup'] = $this->config->get('yandex_yml_pickup');
+		}
+
+		if (isset($this->request->post['yandex_yml_sales_notes'])) {
+			$data['yandex_yml_sales_notes'] = $this->request->post['yandex_yml_sales_notes'];
+		} else {
+			$data['yandex_yml_sales_notes'] = $this->config->get('yandex_yml_sales_notes');
+		}
+
+		if (isset($this->request->post['yandex_yml_store'])) {
+			$data['yandex_yml_store'] = $this->request->post['yandex_yml_store'];
+		} else {
+			$data['yandex_yml_store'] = $this->config->get('yandex_yml_store');
+		}
+		
+		if (isset($this->request->post['yandex_yml_numpictures'])) {
+			$data['yandex_yml_numpictures'] = $this->request->post['yandex_yml_numpictures'];
+		} else {
+			$data['yandex_yml_numpictures'] = $this->config->get('yandex_yml_numpictures');
+		}
+
+		//++++ Для вкладки аттрибутов ++++
+		$data['tab_attributes_description'] = str_replace('%attr_url%', $this->url->link('catalog/attribute', 'token=' . $this->session->data['token'], 'SSL'), $this->language->get('tab_attributes_description'));
+		$data['entry_attributes'] = $this->language->get('entry_attributes');
+		$data['entry_adult'] = $this->language->get('entry_adult');
+		$data['entry_manufacturer_warranty'] = $this->language->get('entry_manufacturer_warranty');
+		$data['entry_country_of_origin'] = $this->language->get('entry_country_of_origin');
+		$data['entry_product_rel'] = $this->language->get('entry_product_rel');
+		$data['entry_product_accessory'] = $this->language->get('entry_product_accessory');
+		$data['entry_attr_vs_description'] = $this->language->get('entry_attr_vs_description');
+
+		if (isset($this->request->post['yandex_yml_attributes'])) {
+			$data['yandex_yml_attributes'] = $this->request->post['yandex_yml_attributes'];
+		} elseif ($this->config->get('yandex_yml_attributes') != '') {
+			$data['yandex_yml_attributes'] = explode(',', $this->config->get('yandex_yml_attributes'));
+		} else {
+			$data['yandex_yml_attributes'] = array();
+		}
+		if (isset($this->request->post['yandex_yml_adult'])) {
+			$data['yandex_yml_adult'] = $this->request->post['yandex_yml_adult'];
+		} else {
+			$data['yandex_yml_adult'] = $this->config->get('yandex_yml_adult');
+		}
+		if (isset($this->request->post['yandex_yml_manufacturer_warranty'])) {
+			$data['yandex_yml_manufacturer_warranty'] = $this->request->post['yandex_yml_manufacturer_warranty'];
+		} else {
+			$data['yandex_yml_manufacturer_warranty'] = $this->config->get('yandex_yml_manufacturer_warranty');
+		}
+		if (isset($this->request->post['yandex_yml_country_of_origin'])) {
+			$data['yandex_yml_country_of_origin'] = $this->request->post['yandex_yml_country_of_origin'];
+		} else {
+			$data['yandex_yml_country_of_origin'] = $this->config->get('yandex_yml_country_of_origin');
+		}
+		if (isset($this->request->post['yandex_yml_attr_vs_description'])) {
+			$data['yandex_yml_attr_vs_description'] = $this->request->post['yandex_yml_attr_vs_description'];
+		} else {
+			$data['yandex_yml_attr_vs_description'] = $this->config->get('yandex_yml_attr_vs_description');
+		}
+
+		if (isset($this->request->post['yandex_yml_product_rel'])) {
+			$data['yandex_yml_product_rel'] = $this->request->post['yandex_yml_product_rel'];
+		} else {
+			$data['yandex_yml_product_rel'] = $this->config->get('yandex_yml_product_rel');
+		}
+		if (isset($this->request->post['yandex_yml_product_accessory'])) {
+			$data['yandex_yml_product_accessory'] = $this->request->post['yandex_yml_product_accessory'];
+		} else {
+			$data['yandex_yml_product_accessory'] = $this->config->get('yandex_yml_product_accessory');
+		}
+		
+		$this->load->model('catalog/attribute');
+		$results = $this->model_catalog_attribute->getAttributes(array('sort'=>'attribute_group'));
+		$data['attributes'] = $results;
+		//---- Для вкладки аттрибутов ----
+
+		//++++ Для магазинов одежды ++++
+		$data['entry_color_option'] = $this->language->get('entry_color_option');
+		$data['entry_size_option'] = $this->language->get('entry_size_option');
+		$data['entry_size_unit'] = $this->language->get('entry_size_unit');
+		$data['entry_optioned_name'] = $this->language->get('entry_optioned_name');
+		$data['optioned_name_no'] = $this->language->get('optioned_name_no');
+		$data['optioned_name_short'] = $this->language->get('optioned_name_short');
+		$data['optioned_name_long'] = $this->language->get('optioned_name_long');
+		
+		$this->load->model('catalog/option');
+		$results = $this->model_catalog_option->getOptions(array('sort' => 'name'));
+		$data['options'] = $results;
+		
+		$data['tab_tailor_description'] = $this->language->get('tab_tailor_description');
+		$data['is_old_version'] = $this->isOldVersion();
+
+		if (isset($this->request->post['yandex_yml_color_options'])) {
+			$data['yandex_yml_color_options'] = $this->request->post['yandex_yml_color_options'];
+		} elseif ($this->config->get('yandex_yml_color_options') != '') {
+			$data['yandex_yml_color_options'] = explode(',', $this->config->get('yandex_yml_color_options'));
+		} else {
+			$data['yandex_yml_color_options'] = array();
+		}
+		if (isset($this->request->post['yandex_yml_size_options'])) {
+			$data['yandex_yml_size_options'] = $this->request->post['yandex_yml_size_options'];
+		} elseif ($this->config->get('yandex_yml_size_options') != '') {
+			$data['yandex_yml_size_options'] = explode(',', $this->config->get('yandex_yml_size_options'));
+		} else {
+			$data['yandex_yml_size_options'] = array();
+		}
+		if (isset($this->request->post['yandex_yml_size_units'])) {
+			$data['yandex_yml_size_units'] = $this->request->post['yandex_yml_size_units'];
+		} elseif ($this->config->get('yandex_yml_size_units') != '') {
+			$data['yandex_yml_size_units'] = unserialize($this->config->get('yandex_yml_size_units'));
+		} else {
+			$data['yandex_yml_size_units'] = array();
+		}
+
+		if (isset($this->request->post['yandex_yml_optioned_name'])) {
+			$data['yandex_yml_optioned_name'] = $this->request->post['yandex_yml_optioned_name'];
+		} else {
+			$data['yandex_yml_optioned_name'] = $this->config->get('yandex_yml_optioned_name');
+		}
+		$data['size_units_orig'] = array(
+			'RU' => 'Россия (СНГ)',
+			'EU' => 'Европа',
+			'UK' => 'Великобритания',
+			'US' => 'США',
+			'INT' => 'Международная');
+		$data['size_units_type'] = array(
+			'INCH' => 'Дюймы',
+			'Height' => 'Рост в сантиметрах',
+			'Months' => 'Возраст в месяцах',
+			'Years' => 'Возраст в годах',
+			'Round' => 'Окружность в сантиметрах');
+		//---- Для магазинов одежды ----
+
+		$this->load->model('localisation/stock_status');
+
+		$data['stock_statuses'] = $this->model_localisation_stock_status->getStockStatuses();
+
+		$this->load->model('catalog/category');
+		$data['categories'] = $this->model_catalog_category->getCategories(0);
+		
+		$this->load->model('catalog/manufacturer');
+		$data['manufacturers'] = $this->model_catalog_manufacturer->getManufacturers(0);
+
+		if (isset($this->request->post['yandex_yml_categories'])) {
+			$data['yandex_yml_categories'] = $this->request->post['yandex_yml_categories'];
+		} elseif ($this->config->get('yandex_yml_categories') != '') {
+			$data['yandex_yml_categories'] = explode(',', $this->config->get('yandex_yml_categories'));
+		} else {
+			$data['yandex_yml_categories'] = array();
+		}
+		if (isset($this->request->post['yandex_yml_manufacturers'])) {
+			$data['yandex_yml_manufacturers'] = $this->request->post['yandex_yml_manufacturers'];
+		} elseif ($this->config->get('yandex_yml_manufacturers') != '') {
+			$data['yandex_yml_manufacturers'] = explode(',', $this->config->get('yandex_yml_manufacturers'));
+		} else {
+			$data['yandex_yml_manufacturers'] = array();
+		}
+		if (isset($this->request->post['yandex_yml_categ_mapping'])) {
+			$data['yandex_yml_categ_mapping'] = $this->request->post['yandex_yml_categ_mapping'];
+		} elseif ($this->config->get('yandex_yml_categ_mapping') != '') {
+			$data['yandex_yml_categ_mapping'] = unserialize($this->config->get('yandex_yml_categ_mapping'));
+		} else {
+			$data['yandex_yml_categ_mapping'] = array();
+		}
+
+
+		$this->load->model('localisation/currency');
+		$currencies = $this->model_localisation_currency->getCurrencies();
+		$allowed_currencies = array_flip(array('RUR', 'RUB', 'BYR', 'KZT', 'UAH'));
+		$data['currencies'] = array_intersect_key($currencies, $allowed_currencies);
+
+		$this->template = 'extension/feed/yandex_yml.tpl';
+		$this->children = array(
+			'common/header',
+			'common/footer'
+		);
+		
+		$data['header'] = $this->load->controller('common/header');
+		$data['column_left'] = $this->load->controller('common/column_left');
+		$data['footer'] = $this->load->controller('common/footer');
+		
+		$this->response->setOutput($this->load->view('extension/feed/yandex_yml.tpl', $data));
+	}
+
+	public function autocomplete() {
+		$text = $this->request->get['text'];
+		$parts = explode('/', $text);
+		foreach ($parts as $key=>$val) {
+			$parts[$key] = trim($val);
+		}
+		if (count($parts) < 2) {
+			$q = $this->db->query("SELECT DISTINCT CONCAT(level1) AS text FROM oc_yandex_category WHERE level1 LIKE '".$this->db->escape($parts[0])."%' AND level2='' AND level3=''");
+		}
+		elseif (count($parts) < 3) {
+			$q = $this->db->query("SELECT DISTINCT CONCAT(level1,'/',level2) AS text FROM oc_yandex_category WHERE level1='".$this->db->escape($parts[0])."' AND level2 LIKE '".$this->db->escape($parts[1])."%' AND level3=''");
+		}
+		elseif (count($parts) < 4) {
+			$q = $this->db->query("SELECT DISTINCT CONCAT(level1,'/',level2,'/',level3) AS text FROM oc_yandex_category WHERE level1='".$this->db->escape($parts[0])."' AND level2='".$this->db->escape($parts[1])."' AND level3 LIKE '".$this->db->escape($parts[2])."%'");
+		}
+		elseif (count($parts) < 5) {
+			$q = $this->db->query("SELECT DISTINCT CONCAT(level1,'/',level2,'/',level3,'/',level4) AS text FROM oc_yandex_category WHERE level1='".$this->db->escape($parts[0])."' AND level2='".$this->db->escape($parts[1])."' AND level3='".$this->db->escape($parts[2])."' AND level4 LIKE '".$this->db->escape($parts[3])."%'");
+		}
+		else {
+			$q = $this->db->query("SELECT DISTINCT CONCAT(level1,'/',level2,'/',level3,'/',level4,'/',level5) AS text FROM oc_yandex_category WHERE level1='".$this->db->escape($parts[0])."' AND level2='".$this->db->escape($parts[1])."' AND level3='".$this->db->escape($parts[2])."' AND level4='".$this->db->escape($parts[3])."' AND level5 LIKE '".$this->db->escape($parts[4])."%'");
+		}
+		$ret = array();
+		foreach ($q->rows as $row) {
+			$ret[] = $row['text'];
+		}
+		echo json_encode($ret);
+	}
+	
+	private function validate($data) {
+		if (!$this->user->hasPermission('modify', 'extension/feed/yandex_yml')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+		/*
+		elseif (!empty(array_intersect($data['yandex_yml_size_options'], $data['yandex_yml_color_options']))) {
+			$this->error['warning'] = $this->language->get('error_intersects_options');
+		}
+		*/
+
+		if (!$this->error) {
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+	}
+}
+?>

@@ -1,0 +1,226 @@
+
+/* Fees and Discounts */
+
+.payment-feediscount .items
+{
+	display: block;
+}
+
+.payment-feediscount .item-row
+{
+    width: 100%;
+    float: left;
+}
+
+.payment-feediscount .item-row > div
+{
+	width: auto;
+	text-align: left;
+	margin: 0;
+	padding: 0 5px 5px 0;
+	float: left;
+}
+
+.payment-feediscount .item-inputs input
+{
+    width: 100px;
+}
+
+.payment-feediscount .item-inputs select
+{
+    width: auto;
+}
+
+.payment-feediscount .item-buttons a
+{
+    float: left;
+}
+
+/* Generic styles */
+
+body *,
+body *:focus,
+body *:hover,
+body *:active
+{
+    box-sizing: border-box;
+    outline: none;
+}
+
+h2
+{
+	margin-top: 15px;
+}
+
+.note
+{
+	margin-bottom: 15px;
+	display: block;
+}
+
+.clearfix
+{
+	clear: both;
+}
+
+.version
+{
+	display: block;
+    line-height: 16px;
+    padding-left: 20px;
+}
+
+.version.latest
+{
+	color: #479401;
+}
+
+.version.update
+{
+	color: #ca3510;
+}
+
+table.form
+{
+    margin-bottom: 0;
+}
+    
+.copyright
+{
+	background: #1e91cf;
+	color: #ffffff;
+	font-size: 125%;
+	padding: 10px;
+	border-color: #1978ab;
+	border-radius: 3px;
+	margin-top: 20px;
+}
+
+.copyright a
+{
+	color: #fffc00;
+}
+
+td .checkbox-select
+{
+	margin-top: 10px;
+}
+
+.checkbox-select a
+{
+	cursor: pointer;
+}
+
+.radio-inline input[type='radio']
+{
+    line-height: 24px;
+    float: left;
+    margin-right: 5px;
+    margin-top: 1px;
+}
+
+.form-horizontal .control-label
+{
+    text-align: left;
+    padding-left: 20px;
+    font-size: 110%;
+    font-weight: normal;
+}
+
+.settings-title
+{
+    margin: 20px 0;
+}
+
+.scrollbox,
+td select,
+td input[type="text"]
+{
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+    height: auto;
+    width: 250px !important;
+    margin: 0;
+    text-align: left;
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+}
+.payment-feediscount-version{
+	display: none !important;
+}
+
+.scrollbox
+{
+	padding: 5px !important;
+}
+
+input[type="radio"]
+{
+    margin-right: 5px !important;
+}
+
+.form-group input[type="checkbox"]
+{
+    margin: 12px 0 0 0;
+    padding: 0;
+}
+
+.form-group .well input[type="checkbox"]
+{
+    float: left;
+    margin: 2px 0 0 -20px;
+}
+
+.scrollbox > div
+{
+    overflow: hidden;
+}
+
+.scrollbox
+{
+	height: 150px;
+}
+
+.table thead td span[data-toggle="tooltip"]::after,
+label.control-label span::after
+{
+    cursor: pointer;
+}
+
+.input-text
+{
+    display: block;
+    float: left;
+    line-height: inherit;
+    font-size: 110%;
+    padding-top: 9px;
+}
+
+#input-cron-link span
+{
+    display: block;
+    line-height: 125%;
+    cursor: pointer;
+}
+
+#input-cron-link .cron-wget
+{
+    opacity: 0.4;
+}
+
+#input-cron-link .cron-wget:hover
+{
+    opacity: 1;
+}
+
+.autocomplete .fa-minus-circle
+{
+    cursor: pointer;
+}
+
+.notice
+{
+	display: block;
+	margin-bottom: 20px;
+}

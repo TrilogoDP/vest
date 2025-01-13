@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+<name>Tweak for Vest</name>
+<code>Tweak for Vest</code>
+<version>1.0.0.0</version>
+<date>29.11.2024</date>
+<author>Hemets</author>
+<link>info@trilogo.dp.ua</link>
+
+
+<file path="catalog/view/theme/oct_techstore/template/*/*.tpl">
+	<operation error="skip">
+		<search><![CDATA[Головна]]></search>
+		<add position="replace"><![CDATA[<?php echo $text_home; ?>]]></add>
+	</operation>	
+</file>
+
+<file path="catalog/controller/*/*.php">
+	<operation error="skip">
+		<search><![CDATA[public function index() {]]></search>
+		<add position="after"><![CDATA[$data['text_home'] = $this->language->get('text_home');]]></add>
+	</operation>	
+</file>
+
+</modification>

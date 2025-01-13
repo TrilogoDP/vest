@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>{NAME}</name>
+    <id>{NAME}</id>
+    <version>{VERSION}</version>
+    <vqmver required="true">2.4.0</vqmver>
+    <author>admin@opencartadmin.com</author>
+    <code>{MOD}</code>
+    <link>http://opencartadmin.com</link>
+
+<file path="catalog/controller/common/home.php" error="skip">
+    <operation error="skip">
+        <search position="replace"><![CDATA[$this->document->addLink(HTTP_SERVER]]></search>
+        <add position="replace"><![CDATA[
+       $this->document->addLink($this->url->link('common/home')
+    ]]></add>
+    </operation>
+    <operation error="skip">
+        <search position="replace"><![CDATA[$this->document->addLink($this->config->get('config_url')]]></search>
+        <add position="replace"><![CDATA[
+       $this->document->addLink($this->url->link('common/home')
+    ]]></add>
+    </operation>
+</file>
+</modification>

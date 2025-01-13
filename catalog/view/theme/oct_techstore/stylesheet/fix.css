@@ -1,0 +1,36 @@
+body .home-page__category .wrap_home-page__category .item .oct-category-item-header {
+    background-color: transparent;
+}
+
+@media screen and (max-width: 560px) {
+    body .ocfilter .ocf-option-values label .badge {
+        margin-right: 0.5rem;
+    }
+} 
+
+
+.account_content .content p.title {
+    font-weight: 400;
+    font-size: 22px !important; 
+    line-height: 36px;
+    text-align: center;
+    color: #274856;
+}
+
+.button-delete {
+    cursor: pointer;
+}
+
+.actions_stickers_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.actions_stickers_container .actions_stickers_item {
+    margin-bottom: 6px;
+}   
+
+.actions_stickers_container .actions_stickers_item:last-child {
+    margin-bottom: 0;
+}
